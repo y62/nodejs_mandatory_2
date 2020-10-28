@@ -22,7 +22,8 @@ db.connect((eer) => {
         "again and again..." +
         "last test" +
         "3rd hand" +
-        "3rd two");
+        "3rd " +
+        "WHATS THISSSSSSSSS!");
 });
 
 
