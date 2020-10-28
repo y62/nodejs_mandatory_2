@@ -26,7 +26,7 @@ db.connect((eer) => {
         "WHATS THISSSSSSSSS!" +
         "4th hand");
 });
-
+console.log("test this...")
 
 app.get("/", (req, res) => {
     res.send("<h1>We're all gonna make it!</h1>");
