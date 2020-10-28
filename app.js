@@ -19,7 +19,8 @@ db.connect((eer) => {
         "console test..." +
         "2nd hand tested" +
         "tested again..." +
-        "again and again...");
+        "again and again..." +
+        "last test");
 });
 
 
