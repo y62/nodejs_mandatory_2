@@ -22,7 +22,7 @@ db.connect((eer) => {
         "again and again..." +
         "last test");
 });
-
+console.log("test this...")
 
 app.get("/", (req, res) => {
     res.send("<h1>We're all gonna make it!</h1>");
