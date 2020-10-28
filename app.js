@@ -27,6 +27,7 @@ db.connect((eer) => {
         "4th hand");
 });
 console.log("test this...")
+console.log("scrum?")
 
 app.get("/", (req, res) => {
     res.send("<h1>We're all gonna make it!</h1>");
