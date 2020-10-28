@@ -16,7 +16,8 @@ db.connect((eer) => {
     if (eer) throw eer;
     console.time('mysql');
     console.log("Database successfully connected!" +
-        "console test...");
+        "console test..." +
+        "2nd hand tested");
 });
 
 
