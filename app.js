@@ -28,7 +28,7 @@ db.connect((eer) => {
 });
 console.log("test this...")
 console.log("scrum?")
-
+console.log("scrum2?")
 app.get("/", (req, res) => {
     res.send("<h1>We're all gonna make it!</h1>");
 });
