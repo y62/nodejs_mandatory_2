@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title><%= title %></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h2><%= title %></h2>
+    <a href="/addClient" class="btn btn-sm btn-primary">Add client</a><br/><br/>
+    <table class="table table-dark table-striped">
+        <thead>
+        <tr>
+            <th>Client Id</th>
+            <th>Client Name</th>
+            <th>Number of employees</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Telephone</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Update</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% clients.forEach(function(client){ %>
+            <tr>
+                <td><%=client.clientId %></td>
+                <td><%=client.clientName %></td>
+                <td><%=client.empNumber %></td>
+                <td><%=client.firstname %></td>
+                <td><%=client.lastname %></td>
+                <td><%=client.emailId %></td>
+                <td><%=client.phoneNo %></td>
+                <td><%=client.address %></td>
+
+                <td>
+                    <a href="deleteC/<%= client.clientId %>" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+
+                <td>
+                    <a href="update/<%= client.clientId %>" class="btn btn-sm btn-primary">Update</a>
+                </td>
+            </tr>
+        <% }); %>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

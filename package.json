@@ -14,13 +14,17 @@
     "dotenv": "^8.2.0",
     "email-existence": "^0.1.6",
     "express": "^4.17.1",
+    "express-rate-limit": "^5.2.3",
     "express-session": "^1.17.1",
     "hbs": "^4.1.1",
     "mysql": "^2.18.1",
     "nodemon": "^2.0.6",
     "path": "^0.12.7"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "bcrypt": "^5.0.0",
+    "ejs": "^3.1.5"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/y62/nodejs_mandatory_2.git"

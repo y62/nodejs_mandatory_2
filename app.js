@@ -1,27 +1,31 @@
 const express = require("express");
 const mysql = require('mysql');
-const session = require('express-session');
 const bodyParser = require('body-parser');
+const session = require('express-session');
 const path = require('path');
 const ejs = require('ejs');
 const app = express();
+const rateLimit = require("express-rate-limit");
 
 const port = 8080;
 
 
+const createUserLimiter =rateLimit({
+    windowMs: 2 * 60  * 1000, // 2 min.
+    max: 3 ,     // limit each IP to 3 requests per windowMs
+    message: "You have exceeded the 2 minutes limit, please come again later !"
+});
+
+
 app.use(express.static("frontend"));
 
-//____________________________________________________________________________
-
-/*app.get("/", (req, res) => {
-    return res.sendFile(__dirname + "/frontend/test.html");
-});*/
+//Database connection_____________________________________________________________________
 
 const connection = mysql.createConnection({
     host: 'database-2.c8e4q2gd2tmb.eu-central-1.rds.amazonaws.com',
     port: 3306,
     user: 'admin',
-    password: '',
+    password: 'adminadmin',
     database: 'nodelogin'
 });
 
@@ -29,6 +33,8 @@ connection.connect(function(error){
     if(!!error) console.log(error);
     else console.log('Database Connected!');
 });
+
+
 
 //set views file
 app.set('views',path.join(__dirname,'frontend/views'));
@@ -42,21 +48,27 @@ app.use(bodyParser.urlencoded({ extended: false }));
 //ADMIN CRUD______________________________________________________________
 
 
-app.get('/add',(req, res) => {
+app.get('/add',createUserLimiter ,(req, res) => {
     res.render('admin_add', {
         title : 'Create a booqie admin'
     });
 });
 
-app.post('/save',(req, res) => {
-    let data = {name: req.body.name, email: req.body.email, phone_no: req.body.phone_no, password: req.body.password};
-    let sql = "INSERT INTO admins SET ?";
 
-    let query = connection.query(sql, data,(err, results) => {
-        if(err) throw err;
-        res.redirect('/admins');
-    });
+app.post('/save',(req, res) => {
+
+let data = {name: req.body.name, email: req.body.email, phone_no: req.body.phone_no, password: req.body.password}
+
+        let sql = "INSERT INTO admins SET ?";
+
+        let query = connection.query(sql, data, (err, results) => {
+            if (err) throw err;
+            res.redirect('/admins');
+        });
+
+
 });
+
 
 app.get('/delete/:adminId',(req, res) => {
     const adminId = req.params.adminId;
@@ -66,6 +78,7 @@ app.get('/delete/:adminId',(req, res) => {
         res.redirect('/admins');
     });
 });
+
 
 app.get('/emailNotFound', (req, res) => {
 });
@@ -117,7 +130,7 @@ app.get('/admins',(req, res) => {
             });
         });
     } else {
-        console.log("cannot login")
+        console.log("cannot login");
     }
 });
 
@@ -129,6 +142,114 @@ app.get('/home', function(req, res) {
     }
     res.end();
 });
+
+
+
+ // Client Crud_____________________________________________________
+
+
+// CREATE
+
+//setting view for client registration form
+app.get('/addClient',(req, res) => {
+    res.render('client_add', {
+        title : 'Create a booqie Client'
+    });
+});
+
+// Create a client
+app.post('/saveClient',(req, res) => {
+
+    let data = {clientName: req.body.clientName,
+        empNumber: req.body.empNumber,
+        firstname: req.body.firstname,
+        lastname:  req.body.lastname,
+        emailId:   req.body.emailId,
+        phoneNo:   req.body.phoneNo,
+        address:req.body.address};
+    let sql = "INSERT INTO clients SET ?";
+
+    let query = connection.query(sql, data,(err, results) => {
+        if(err) throw err;
+        console.log(err);
+        res.redirect('/clients');
+    });
+});
+
+//READ
+
+//read(get) all clients
+app.get('/clients',(req, res) => {
+
+    let sql = "SELECT * FROM clients";
+    let query = connection.query(sql, (err, rows) => {
+        if (!err) {
+            res.render('client_list', {
+                title: "Welcome to booqie's clients list",
+                clients: rows
+            });
+        } else {
+            throw err;
+        }
+    });
+
+});
+// UPDATE
+
+// setting a view for client update form
+/* app.get('/update',(req, res) => {
+    res.render('updateClient', {
+        title : 'Update a Client'
+    });
+});
+*/
+
+// update a client
+app.get('/update/:clientId',(req, res) => {
+    const clientId = req.params.clientId;
+    let sql = `SELECT * from clients where clientId = ${clientId}`;
+    let query = connection.query(sql, (err, result) => {
+        if (err) throw err;
+        res.render('updateClient', {
+            title: "Edit Client Info ",
+            clientId: result [0]
+        });
+
+    });
+});
+
+app.post('/updated',(req, res) => {
+
+
+    const clientId = req.body.clientId;
+        let sql = `UPDATE clients SET
+            clientName = '"+ req.body.clientName +"',
+            empNumber ='"+ req.body.empNumber +"',
+            firstname= '" +req.body.firstname+"',
+            lastname= '"+ req.body.lastname +"',
+            emailId= '"+ req.body.emailId +"',
+            phoneNo= '"+ req.body.phoneNo +"',
+            address= '"+ req.body.address}+"' WHERE clientId = ${clientId};`;
+        let query = connection.query(sql,(err, results) => {
+            if(err) throw err;
+            res.redirect('/clients');
+        });
+    });
+
+
+
+// delete
+app.get('/deleteC/:clientId',(req, res) => {
+
+    const clientId = req.params.clientId;
+    let sql = `DELETE from clients where clientId = ${clientId}`;
+    let query = connection.query(sql, (err, result) => {
+        if (err) throw err;
+       // console.log(query)
+        res.redirect('/clients');
+    });
+});
+
 
 app.listen(port, () => {
     console.log("Server is running on port:", port)
