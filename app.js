@@ -6,6 +6,7 @@ const path = require('path');
 const ejs = require('ejs');
 const app = express();
 const rateLimit = require("express-rate-limit");
+const nodemailer = require("nodemailer");
 
 const port = 8080;
 
@@ -55,18 +56,50 @@ app.get('/add',createUserLimiter ,(req, res) => {
 });
 
 
-app.post('/save',(req, res) => {
+app.post('/save',async (req, res) => {
 
-let data = {name: req.body.name, email: req.body.email, phone_no: req.body.phone_no, password: req.body.password}
+    let data = {name: req.body.name, email: req.body.email, phone_no: req.body.phone_no, password: req.body.password}
 
-        let sql = "INSERT INTO admins SET ?";
+            let sql = "INSERT INTO admins SET ?";
 
-        let query = connection.query(sql, data, (err, results) => {
-            if (err) throw err;
-            res.redirect('/admins');
-        });
+            let query = connection.query(sql, data, (err, results) => {
+                if (err) throw err;
+                res.redirect('/admins');
+            });
+
+ // Nodemailer
+    const transporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+            user: '',
+            pass: ''
+        }
+    });
+
+    // send mail with defined transport object
+    let email = req.body.email
+    const msg = {
+        from: '"From express app 👻" <theExpressApp@example.com>', // sender address
+        to: `${email}`, // list of receivers
+        subject: "Registration conformation", // Subject line
+        text: "Welcome User ! Your user id has been created. you can access your" +
+            " user profile by login into your account.", // plain text body
+    };
+
+    // send mail with defined transport object
+    const info = await transporter.sendMail(msg);
 
 
+
+    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+    console.log("Message sent: %s", info.messageId);
+    // Preview only available when sending through an Ethereal account
+    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+
+    res.send('Email sent !')
 });
 
 
@@ -145,110 +178,9 @@ app.get('/home', function(req, res) {
 
 
 
- // Client Crud_____________________________________________________
-
-
-// CREATE
-
-//setting view for client registration form
-app.get('/addClient',(req, res) => {
-    res.render('client_add', {
-        title : 'Create a booqie Client'
-    });
-});
-
-// Create a client
-app.post('/saveClient',(req, res) => {
-
-    let data = {clientName: req.body.clientName,
-        empNumber: req.body.empNumber,
-        firstname: req.body.firstname,
-        lastname:  req.body.lastname,
-        emailId:   req.body.emailId,
-        phoneNo:   req.body.phoneNo,
-        address:req.body.address};
-    let sql = "INSERT INTO clients SET ?";
-
-    let query = connection.query(sql, data,(err, results) => {
-        if(err) throw err;
-        console.log(err);
-        res.redirect('/clients');
-    });
-});
-
-//READ
-
-//read(get) all clients
-app.get('/clients',(req, res) => {
-
-    let sql = "SELECT * FROM clients";
-    let query = connection.query(sql, (err, rows) => {
-        if (!err) {
-            res.render('client_list', {
-                title: "Welcome to booqie's clients list",
-                clients: rows
-            });
-        } else {
-            throw err;
-        }
-    });
-
-});
-// UPDATE
-
-// setting a view for client update form
-/* app.get('/update',(req, res) => {
-    res.render('updateClient', {
-        title : 'Update a Client'
-    });
-});
-*/
-
-// update a client
-app.get('/update/:clientId',(req, res) => {
-    const clientId = req.params.clientId;
-    let sql = `SELECT * from clients where clientId = ${clientId}`;
-    let query = connection.query(sql, (err, result) => {
-        if (err) throw err;
-        res.render('updateClient', {
-            title: "Edit Client Info ",
-            clientId: result [0]
-        });
-
-    });
-});
-
-app.post('/updated',(req, res) => {
-
-
-    const clientId = req.body.clientId;
-        let sql = `UPDATE clients SET
-            clientName = '"+ req.body.clientName +"',
-            empNumber ='"+ req.body.empNumber +"',
-            firstname= '" +req.body.firstname+"',
-            lastname= '"+ req.body.lastname +"',
-            emailId= '"+ req.body.emailId +"',
-            phoneNo= '"+ req.body.phoneNo +"',
-            address= '"+ req.body.address}+"' WHERE clientId = ${clientId};`;
-        let query = connection.query(sql,(err, results) => {
-            if(err) throw err;
-            res.redirect('/clients');
-        });
-    });
 
 
 
-// delete
-app.get('/deleteC/:clientId',(req, res) => {
-
-    const clientId = req.params.clientId;
-    let sql = `DELETE from clients where clientId = ${clientId}`;
-    let query = connection.query(sql, (err, result) => {
-        if (err) throw err;
-       // console.log(query)
-        res.redirect('/clients');
-    });
-});
 
 
 app.listen(port, () => {
