@@ -9,7 +9,7 @@ const rateLimit = require("express-rate-limit");
 
 const port = 8080;
 
-
+// initializing the value of rate limit variable
 const createUserLimiter =rateLimit({
     windowMs: 2 * 60  * 1000, // 2 min.
     max: 3 ,     // limit each IP to 3 requests per windowMs
@@ -47,7 +47,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 //ADMIN CRUD______________________________________________________________
 
-
+// Rate limiting on add user
 app.get('/add',createUserLimiter ,(req, res) => {
     res.render('admin_add', {
         title : 'Create a booqie admin'
@@ -145,110 +145,7 @@ app.get('/home', function(req, res) {
 
 
 
- // Client Crud_____________________________________________________
 
-
-// CREATE
-
-//setting view for client registration form
-app.get('/addClient',(req, res) => {
-    res.render('client_add', {
-        title : 'Create a booqie Client'
-    });
-});
-
-// Create a client
-app.post('/saveClient',(req, res) => {
-
-    let data = {clientName: req.body.clientName,
-        empNumber: req.body.empNumber,
-        firstname: req.body.firstname,
-        lastname:  req.body.lastname,
-        emailId:   req.body.emailId,
-        phoneNo:   req.body.phoneNo,
-        address:req.body.address};
-    let sql = "INSERT INTO clients SET ?";
-
-    let query = connection.query(sql, data,(err, results) => {
-        if(err) throw err;
-        console.log(err);
-        res.redirect('/clients');
-    });
-});
-
-//READ
-
-//read(get) all clients
-app.get('/clients',(req, res) => {
-
-    let sql = "SELECT * FROM clients";
-    let query = connection.query(sql, (err, rows) => {
-        if (!err) {
-            res.render('client_list', {
-                title: "Welcome to booqie's clients list",
-                clients: rows
-            });
-        } else {
-            throw err;
-        }
-    });
-
-});
-// UPDATE
-
-// setting a view for client update form
-/* app.get('/update',(req, res) => {
-    res.render('updateClient', {
-        title : 'Update a Client'
-    });
-});
-*/
-
-// update a client
-app.get('/update/:clientId',(req, res) => {
-    const clientId = req.params.clientId;
-    let sql = `SELECT * from clients where clientId = ${clientId}`;
-    let query = connection.query(sql, (err, result) => {
-        if (err) throw err;
-        res.render('updateClient', {
-            title: "Edit Client Info ",
-            clientId: result [0]
-        });
-
-    });
-});
-
-app.post('/updated',(req, res) => {
-
-
-    const clientId = req.body.clientId;
-        let sql = `UPDATE clients SET
-            clientName = '"+ req.body.clientName +"',
-            empNumber ='"+ req.body.empNumber +"',
-            firstname= '" +req.body.firstname+"',
-            lastname= '"+ req.body.lastname +"',
-            emailId= '"+ req.body.emailId +"',
-            phoneNo= '"+ req.body.phoneNo +"',
-            address= '"+ req.body.address}+"' WHERE clientId = ${clientId};`;
-        let query = connection.query(sql,(err, results) => {
-            if(err) throw err;
-            res.redirect('/clients');
-        });
-    });
-
-
-
-// delete
-app.get('/deleteC/:clientId',(req, res) => {
-
-    const clientId = req.params.clientId;
-    let sql = `DELETE from clients where clientId = ${clientId}`;
-    let query = connection.query(sql, (err, result) => {
-        if (err) throw err;
-       // console.log(query)
-        res.redirect('/clients');
-    });
-});
 
 
 app.listen(port, () => {
