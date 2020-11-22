@@ -10,7 +10,7 @@ const nodemailer = require("nodemailer");
 
 const port = 8080;
 
-
+// initializing the value of rate limit variable
 const createUserLimiter =rateLimit({
     windowMs: 2 * 60  * 1000, // 2 min.
     max: 3 ,     // limit each IP to 3 requests per windowMs
@@ -25,8 +25,8 @@ app.use(express.static("frontend"));
 const connection = mysql.createConnection({
     host: 'database-2.c8e4q2gd2tmb.eu-central-1.rds.amazonaws.com',
     port: 3306,
-    user: 'admin',
-    password: 'adminadmin',
+    user: '',
+    password: '',
     database: 'nodelogin'
 });
 
@@ -48,7 +48,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 //ADMIN CRUD______________________________________________________________
 
-
+// Rate limiting on add user
 app.get('/add',createUserLimiter ,(req, res) => {
     res.render('admin_add', {
         title : 'Create a booqie admin'
@@ -179,8 +179,11 @@ app.get('/home', function(req, res) {
 
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 1724d610cb4a69113066b31a76987186b1097f7c
 
 
 app.listen(port, () => {
