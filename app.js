@@ -4,6 +4,9 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const path = require('path');
 const ejs = require('ejs');
+const bcrypt = require('bcrypt');
+
+
 const app = express();
 
 const port = 8080;
@@ -43,27 +46,30 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 
 app.get('/add',(req, res) => {
-    res.render('admin_add', {
-        title : 'Create a booqie admin'
+    res.render('register_user', {
+        title : 'Create an user'
     });
 });
 
-app.post('/save',(req, res) => {
-    let data = {name: req.body.name, email: req.body.email, phone_no: req.body.phone_no, password: req.body.password};
-    let sql = "INSERT INTO admins SET ?";
-
-    let query = connection.query(sql, data,(err, results) => {
+app.post('/save',  (req, res) => {
+const username = req.body.username;
+const encryptedPassword = req.body.password;
+    let password = bcrypt.hashSync(encryptedPassword, 10);
+   // let password = hash.toString();
+    const data = {username, password};
+        let sql = "INSERT INTO users SET ?";
+        connection.query(sql, data,(err, results) => {
         if(err) throw err;
-        res.redirect('/admins');
+        res.redirect('/users');
     });
 });
 
-app.get('/delete/:adminId',(req, res) => {
-    const adminId = req.params.adminId;
-    let sql = `DELETE from admins where id = ${adminId}`;
+app.get('/delete/:userId',(req, res) => {
+    const userId = req.params.userId;
+    let sql = `DELETE from users where id = ${userId}`;
     let query = connection.query(sql,(err, result) => {
         if(err) throw err;
-        res.redirect('/admins');
+        res.redirect('/users');
     });
 });
 
@@ -86,34 +92,53 @@ app.get('/', function(request, response) {
     response.sendFile(path.join(__dirname + '/frontend/login.html'));
 });
 
+//$2b$10$uCsFBmr1x9FsZ9svwyn19.FM7BV3EMqriqz137pbAbk1eg8I.fm06
+//$2b$10$8aGd9MQGHuI.iAR2BHQypeN.DdyU36KfumcjaTvL2mJ04XLWUw4L6
+
+
+
+
 app.post('/auth', function(req, res) {
-    const email = req.body.email;
+    const username = req.body.username;
     const password = req.body.password;
-    if (email && password) {
-        connection.query('SELECT * FROM admins WHERE email = ? AND password = ?', [email, password], function(error, results, fields) {
-            if (results.length > 0) {
+
+    if (username && password) {
+    let cuttedPass = "";
+        function cutted() {
+            connection.query("SELECT password FROM users WHERE username = ?", [username, password], function (error, result, fields) {
+                let hashedPass = JSON.stringify(result);
+             //   cuttedG = hashed.substring(13, 75);
+             //   console.log(cuttedG);
+                return cuttedPass = hashedPass.substring(14, 74);
+            });
+        }
+        cutted();
+
+          connection.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], function (error, results, fields) {
+              let mypass = cuttedPass;
+            if (bcrypt.compareSync(password, mypass) === true)  {
                 req.session.loggedin = true;
-                req.session.email = email;
-                res.redirect('/admins');
+                req.session.username = username;
+                res.redirect('/users');
             } else {
-                res.send('Incorrect Email and/or Password!');
+                res.send('Incorrect Username and/or Password!');
             }
             res.end();
         });
     } else {
-        res.send('Please enter Email and Password!');
+        res.send('Please enter Username and Password!');
         res.end();
     }
 });
 
-app.get('/admins',(req, res) => {
+app.get('/users',(req, res) => {
     if (req.session.loggedin) {
-        let sql = "SELECT * FROM admins";
+        let sql = "SELECT * FROM users";
         let query = connection.query(sql, (err, rows) => {
             if (err) throw err;
-            res.render('admin_list', {
-                title: 'Welcome to booqie admin list',
-                admins: rows
+            res.render('user_list', {
+                title: 'LOGIN PAGE',
+                users: rows
             });
         });
     } else {
@@ -123,7 +148,7 @@ app.get('/admins',(req, res) => {
 
 app.get('/home', function(req, res) {
     if (req.session.loggedin) {
-        res.send('Welcome back, ' + req.session.email + '!');
+        res.send('Welcome back, ' + req.session.username + '!');
     } else {
         res.send('Please login to view this page!');
     }
