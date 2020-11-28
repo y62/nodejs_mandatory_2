@@ -25,8 +25,8 @@ app.use(express.static("frontend"));
 const connection = mysql.createConnection({
     host: 'database-2.c8e4q2gd2tmb.eu-central-1.rds.amazonaws.com',
     port: 3306,
-    user: '',
-    password: '',
+    user: 'admin',
+    password: 'adminadmin',
     database: 'nodelogin'
 });
 
@@ -67,39 +67,44 @@ app.post('/save',async (req, res) => {
                 res.redirect('/admins');
             });
 
- // Nodemailer
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: {
-            user: '',
-            pass: ''
+     // Nodemailer
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.ethereal.email',
+            port: 587,
+            secure: false, // true for 465, false for other ports
+            auth: {
+                user: 'kasandra.ratke@ethereal.email',
+                pass: 'sacSPSDJYXjt9kUTnF'
+            }
+        });
+
+        // send mail with defined transport object
+        let email = req.body.email
+        const msg = {
+            from: '"From express app" <theExpressApp@example.com>', // sender address
+            to: `${email}`, // list of receivers
+            subject: "Registration conformation", // Subject line
+            text: "Welcome User ! Your user id has been created. you can access your" +
+                " user profile by login into your account.", // plain text body
+        };
+
+        try {
+            // send mail with defined transport object
+            const info = await transporter.sendMail(msg);
+
+
+            // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+            console.log("Message sent: %s", info.messageId);
+            // Preview only available when sending through an Ethereal account
+             console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+            // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+
+            res.send('Email sent !')
+
         }
-    });
-
-    // send mail with defined transport object
-    let email = req.body.email
-    const msg = {
-        from: '"From express app 👻" <theExpressApp@example.com>', // sender address
-        to: `${email}`, // list of receivers
-        subject: "Registration conformation", // Subject line
-        text: "Welcome User ! Your user id has been created. you can access your" +
-            " user profile by login into your account.", // plain text body
-    };
-
-    // send mail with defined transport object
-    const info = await transporter.sendMail(msg);
-
-
-
-    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-    console.log("Message sent: %s", info.messageId);
-    // Preview only available when sending through an Ethereal account
-    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-    // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-
-    res.send('Email sent !')
+        catch (err){
+            res.status(500).send(err); //Internal Server Error
+        }
 });
 
 
@@ -178,12 +183,6 @@ app.get('/home', function(req, res) {
 
 
 
-
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 1724d610cb4a69113066b31a76987186b1097f7c
 
 
 app.listen(port, () => {
