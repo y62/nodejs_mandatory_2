@@ -8,8 +8,38 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- Font awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+          integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+
+
 </head>
 <body>
+<header>
+    <div>
+        <!-- Navbar and User icon -->
+        <nav class="navbar" style="background-color: #454d55">
+            <a class="navbar-brand" href="#" style="color: white;font-size: 25px;">
+                <i class="fas fa-users"></i> <strong></strong>
+                <span id="date" class="lead"> </span>
+                <span id="time" class="lead" > </span>
+                <link><a  class="navbar-brand" style="color: aliceblue" href=" #" >Home</a></link>
+                <link><a  class="navbar-brand" style="color: aliceblue" href=" #" >Contact</a></link>
+
+            </a>
+        </nav>
+        <!-- java script to get current time and date value -->
+        <script>
+            // request a weekday along with a long date
+            let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dt = new Date();
+            document.getElementById("date").innerHTML = dt.toLocaleString('en-US', options);
+            document.getElementById("time").innerHTML = dt.toLocaleTimeString('en-US');
+        </script>
+    </div>
+</header>
+
+
 
 <div class="container">
     <h2><%= title %></h2>
