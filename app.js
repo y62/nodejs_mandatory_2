@@ -8,20 +8,15 @@ const ejs = require('ejs');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const rateLimit = require('express-rate-limit');
-
 const app = express();
-
 const port = 8080;
+app.use(express.static("frontend/views"));
 
-
-app.use(express.static("frontend"));
-
-//____________________________________________________________________________
 
 const createUserLimiter =rateLimit({
     windowMs: 2 * 60  * 1000, // 2 min.
     max: 3 ,     // limit each IP to 3 requests per windowMs
-    message: "You have exceeded the 2 minutes limit, please come again later !"
+    message: "You have exceeded the 2 minutes limit, please come again later!"
 });
 
 const connection = mysql.createConnection({
@@ -37,10 +32,8 @@ connection.connect(function(error){
     else console.log('Database Connected!');
 });
 
-//set views file
-app.set('views',path.join(__dirname,'frontend/views'));
 
-//set view engine
+app.set('views',path.join(__dirname,'frontend/views'));
 app.set('view engine', 'ejs');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -56,13 +49,9 @@ app.use(session({
 app.use(bodyParser.urlencoded({extended : true}));
 app.use(bodyParser.json());
 
-app.get('/', function(request, response) {
-    response.sendFile(path.join(__dirname + '/frontend/login.html'));
+app.get('/login', function(request, response) {
+    response.sendFile(path.join(__dirname + '/frontend/views/login.html'));
 });
-
-//$2b$10$uCsFBmr1x9FsZ9svwyn19.FM7BV3EMqriqz137pbAbk1eg8I.fm06
-//$2b$10$8aGd9MQGHuI.iAR2BHQypeN.DdyU36KfumcjaTvL2mJ04XLWUw4L6
-
 
 app.post('/auth', function(req, res) {
     const email = req.body.email;
@@ -72,17 +61,16 @@ app.post('/auth', function(req, res) {
         let cuttedPass = "";
         function cutted() {
             connection.query("SELECT password FROM users WHERE email = ?", [email, password], function (error, result, fields) {
+                console.log(result);
                 let hashedPass = JSON.stringify(result);
-                //   cuttedG = hashed.substring(13, 75);
-                //   console.log(cuttedG);
                 return cuttedPass = hashedPass.substring(14, 74);
             });
         }
         cutted();
 
         connection.query('SELECT * FROM users WHERE email = ? AND password = ?', [email, password], function (error, results, fields) {
-            let mypass = cuttedPass;
-            if (bcrypt.compareSync(password, mypass) === true)  {
+            let hashPass = cuttedPass;
+            if (bcrypt.compareSync(password, hashPass) === true)  {
                 req.session.loggedin = true;
                 req.session.email = email;
                 res.redirect('/users');
@@ -103,7 +91,7 @@ app.get('/users',(req, res) => {
         let query = connection.query(sql, (err, rows) => {
             if (err) throw err;
             res.render('user_list', {
-                title: 'LOGIN PAGE',
+                title: 'User List',
                 users: rows
             });
         });
@@ -112,7 +100,7 @@ app.get('/users',(req, res) => {
     }
 });
 
-app.get('/home', function(req, res) {
+app.get('/home', (req, res) => {
     if (req.session.loggedin) {
         res.send('Welcome back, ' + req.session.email + '!');
     } else {
@@ -121,7 +109,7 @@ app.get('/home', function(req, res) {
     res.end();
 });
 
-//ADMIN CRUD______________________________________________________________
+//USER CRUD______________________________________________________________
 
 const loginMsg = "Please login to view this page..."
 
@@ -136,7 +124,7 @@ function confirmationMail(confirmationAcc) {
     });
 
     let mailOptions = {
-        from: 'y62@outlook.dk', //
+        from: process.env.EMAIL, //
         to: confirmationAcc,
         subject: 'Welcome ' + confirmationAcc,
         text: 'Your account ' + confirmationAcc + ' has been successfully created!'
@@ -184,6 +172,13 @@ app.get('/delete/:userId',(req, res) => {
     });
 });
 
+app.get('/', (req, res) => {
+    return res.sendFile(__dirname + "/frontend/index.html");
+});
+
+app.get('/contact', (req, res) => {
+    return res.sendFile(__dirname + "/frontend/contact.html");
+});
 
 app.listen(port, () => {
     console.log("Server is running on port:", port)
