@@ -18,6 +18,11 @@ app.use(express.static("frontend"));
 
 //____________________________________________________________________________
 
+const createUserLimiter =rateLimit({
+    windowMs: 2 * 60  * 1000, // 2 min.
+    max: 3 ,     // limit each IP to 3 requests per windowMs
+    message: "You have exceeded the 2 minutes limit, please come again later !"
+});
 
 const connection = mysql.createConnection({
     host: 'database-2.c8e4q2gd2tmb.eu-central-1.rds.amazonaws.com',
@@ -64,19 +69,19 @@ app.post('/auth', function(req, res) {
     const password = req.body.password;
 
     if (email && password) {
-    let cuttedPass = "";
+        let cuttedPass = "";
         function cutted() {
             connection.query("SELECT password FROM users WHERE email = ?", [email, password], function (error, result, fields) {
                 let hashedPass = JSON.stringify(result);
-             //   cuttedG = hashed.substring(13, 75);
-             //   console.log(cuttedG);
+                //   cuttedG = hashed.substring(13, 75);
+                //   console.log(cuttedG);
                 return cuttedPass = hashedPass.substring(14, 74);
             });
         }
         cutted();
 
-          connection.query('SELECT * FROM users WHERE email = ? AND password = ?', [email, password], function (error, results, fields) {
-              let mypass = cuttedPass;
+        connection.query('SELECT * FROM users WHERE email = ? AND password = ?', [email, password], function (error, results, fields) {
+            let mypass = cuttedPass;
             if (bcrypt.compareSync(password, mypass) === true)  {
                 req.session.loggedin = true;
                 req.session.email = email;
