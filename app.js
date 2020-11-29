@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const ejs = require('ejs');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
 
 
 const app = express();
@@ -44,6 +45,30 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 //ADMIN CRUD______________________________________________________________
 
+let transporter = nodemailer.createTransport({
+    service: 'outlook',
+    auth: {
+        user: process.env.EMAIL,// TODO: your gmail account
+        pass: process.env.PASSWORD // TODO: your gmail password
+    }
+});
+
+// Step 2
+let mailOptions = {
+    from: 'y62@outlook.dk', // TODO: email sender
+    to: 'yous1210@stud.kea.dk', // TODO: email receiver
+    subject: 'ANDERS LATIF',
+    text: 'HUSK AT LAVE MANDATORIES!!!!'
+};
+
+// Step 3
+transporter.sendMail(mailOptions, (err, data) => {
+    if (err) {
+        return log('Error occurs');
+    }
+    return log('Email sent!!!');
+});
+
 
 app.get('/add',(req, res) => {
     res.render('register_user', {
@@ -60,6 +85,12 @@ const encryptedPassword = req.body.password;
         let sql = "INSERT INTO users SET ?";
         connection.query(sql, data,(err, results) => {
         if(err) throw err;
+            transporter.sendMail(mailOptions, (err, data) => {
+                if (err) {
+                    return console.log('Error occurs');
+                }
+                return console.log('Email sent!!!');
+            });
         res.redirect('/users');
     });
 });
