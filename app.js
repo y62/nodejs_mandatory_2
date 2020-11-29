@@ -18,6 +18,11 @@ app.use(express.static("frontend"));
 
 //____________________________________________________________________________
 
+const createUserLimiter =rateLimit({
+    windowMs: 2 * 60  * 1000, // 2 min.
+    max: 3 ,     // limit each IP to 3 requests per windowMs
+    message: "You have exceeded the 2 minutes limit, please come again later !"
+});
 
 const connection = mysql.createConnection({
     host: 'database-2.c8e4q2gd2tmb.eu-central-1.rds.amazonaws.com',
